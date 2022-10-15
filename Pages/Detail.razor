@@ -1,0 +1,267 @@
+﻿@using System.Net.Http.Json
+@using System.Text.Json.Serialization;
+@using Markdig
+@using BlogBlazorServer.DbConnection
+@using BlogBlazorServer.Models
+@using System.Text.RegularExpressions
+@inject NavigationManager NavigationManager
+
+@page "/detail/{ID}"
+
+
+<style>
+    .mud-button-text.mud-button-text-secondary:hover, .mud-button-text.mud-button-text-secondary:focus-visible {
+        background-color: transparent;
+    }
+
+    ul{
+        list-style:inherit;
+    }
+
+</style>
+
+<MudGrid>
+    <MudItem xs="10">
+        <MudPaper Elevation="25" Style="position: relative;">
+            <MudOverlay Visible="isVisible" DarkBackground="true" Absolute="true">
+                <MudProgressCircular Color="Color.Secondary" Indeterminate="true" />
+            </MudOverlay>
+            @if (isVisible)
+            {
+                <MudSkeleton Height="100px" Class="px-5" />
+            }
+            else
+            {
+                <MudItem xs="12">
+                    <MudText Typo="Typo.h4" Style="text-align:left" Class="mx-5 py-10">@Content.ARTICLE_NAME</MudText>
+                </MudItem>
+                <MudGrid>
+                    <MudItem xs="1" Style="text-align:left;flex-basis: 0;" Class="ml-8 px-0">
+                        <MudIcon Icon="@Icons.Rounded.CalendarMonth" Size="Size.Medium" />
+                    </MudItem>
+                    <MudItem xs="2" Style="text-align:left" Class="px-1">
+                        <MudText Typo="Typo.overline" Style="font-weight: 100"> @Content.DATETIME_CREATED</MudText>
+                    </MudItem>
+                    <MudItem xs="6" Style="text-align:left" Class="mb-2">
+                        @for (var i = 0; i < @Content.ARTICLE_CATEGORY.ToString().Split(';').Length; i++)
+                        {
+                            var item = @Content.ARTICLE_CATEGORY.ToString().Split(';')[i];
+                            string c = $"background:{Constants.Colors[i]};color:#fff";
+                            <MudChip Icon="@Icons.Filled.Tag" Label="true" Style="@c" Size="Size.Small">@item</MudChip>
+                        }
+                    </MudItem>
+                </MudGrid>
+
+            }
+            <MudDivider />
+            @if (isVisible)
+            {
+                <MudCard>
+                    <MudSkeleton SkeletonType="SkeletonType.Rectangle" Height="200px" />
+                    <MudCardContent>
+                        <MudSkeleton Height="50px" Class="mx-5" Width="30%" />
+                        <MudSkeleton Height="70px" Class="mx-5" Width="50%" />
+                        <MudSkeleton Height="100px" Class="mx-5" />
+                        <MudSkeleton Height="500px" Class="mx-5" />
+                    </MudCardContent>
+                    <MudCardActions>
+                        <MudSkeleton Width="64px" Height="40px" Class="ml-2" />
+                        <MudSkeleton Width="105px" Height="40px" Class="ml-3" />
+                    </MudCardActions>
+                </MudCard>
+
+            }
+            else
+            {
+                <MudText Class="pa-5 markdown-body" Typo="Typo.body1">@(new MarkupString(result))</MudText>
+            }
+
+
+            <MudDivider Class="my-5" />
+            <MudItem xs="12" Class="ma-5">
+                <MudText Typo="Typo.h5" Style="font-weight:700">更多</MudText>
+            </MudItem>
+            <MudGrid Class="mb-5">
+                @if (Content.LAST_ESSAY_NAME != null)
+                {
+                    <MudItem xs="1" Style="text-align:right" Class="pr-1">
+                        <MudIcon Icon="@Icons.Rounded.NavigateBefore" Size="Size.Medium" />
+                    </MudItem>
+                    <MudItem xs="5" Style="text-align:left" Class="px-1">
+                        @{
+                            var h = $"/detail/{Content.LAST_ESSAY}";
+                                                        <MudText Typo="Typo.h6" Style="margin-top:-3px;"><a href="@h">@Content.LAST_ESSAY_NAME</a></MudText>
+                        }
+
+                    </MudItem>
+                }
+                else
+                {
+                    <MudItem xs="6"></MudItem>
+                }
+                @if (Content.NEXT_ESSAY_NAME != null)
+                {
+                    <MudItem xs="5" Style="text-align:right" Class="px-1">
+                        @{
+                            var h = $"/detail/{Content.NEXT_ESSAY}";
+                                                        <MudText Typo="Typo.h6" Style="margin-top:-3px;"><a href="@h">@Content.NEXT_ESSAY_NAME</a></MudText>
+                        }
+                    </MudItem>
+                    <MudItem xs="1" Style="text-align:left" Class="px-1">
+                        <MudIcon Icon="@Icons.Rounded.NavigateNext" Size="Size.Medium" />
+                    </MudItem>
+                }
+                else
+                {
+                    <MudItem xs="6"></MudItem>
+                }
+            </MudGrid>
+
+        </MudPaper>
+    </MudItem>
+    <MudItem xs="2">
+        <MudPaper Elevation="25" Class="pa-4">
+
+            <MudText Typo="Typo.h6">目录</MudText>
+            <MudDivider Class="my-2"/>
+            @foreach (var item in Tocs)
+            {
+                var route = NavigationManager.Uri.Replace(NavigationManager.BaseUri, "");
+                var herf = $"/{route}#{item.Id}";
+                <a style="text-decoration: none;overflow:hidden;" href="@herf">
+                    <font color="black">
+                        @while (item.Index-- > 0)
+                        {
+                            <span style="margin-left: 15px"></span>
+                        }
+                        ⚪@item.Name<br />
+                    </font>
+                </a>
+            }
+        </MudPaper>
+    </MudItem>
+    <MudScrollToTop>
+        <MudFab Color="Color.Tertiary" Icon="@Icons.Filled.ArrowCircleUp" />
+    </MudScrollToTop>
+</MudGrid>
+
+@code {
+    private string id;
+    [Parameter]
+    public string ID
+    {
+        get => id;
+        set
+        {
+            id = value;
+            ToPage();
+        }
+    }
+    bool isVisible = false;
+    dynamic Content = new
+    {
+        ARTICLE_NAME = "",
+        CONTENT = "",
+        LAST_ESSAY_NAME = "",
+        NEXT_ESSAY_NAME = "",
+        LAST_ESSAY = "",
+        NEXT_ESSAY = ""
+    };
+    string result = "";
+
+    class toc
+    {
+        public int Index { get; set; }
+        public string Id { get; set; }
+        public string Name { get; set; }
+    }
+
+    List<toc> Tocs = new List<toc>();
+
+    protected override async Task OnInitializedAsync()
+    {
+        isVisible = true;
+        var url = NavigationManager.Uri;
+        var idx = url.LastIndexOf('=');
+        var id = url.Substring(idx + 1);
+        var db = new DbContext();
+        var content = db.GetContent(ID);
+        Content = await content;
+        var pipeline = new MarkdownPipelineBuilder().UseAdvancedExtensions().Build();
+        string s = Content.CONTENT.ToString();
+        result = Markdown.ToHtml(s, pipeline);
+        isVisible = false;
+        GetToc(result);
+    }
+
+
+    public void ToPage()
+    {
+        var url = NavigationManager.Uri;
+        var idx = url.LastIndexOf('=');
+        var id = url.Substring(idx + 1);
+        var db = new DbContext();
+        id = Content.LAST_ESSAY.ToString();
+        var content = db.GetContent(ID).Result;
+        if (content is null) return;
+        Content = content;
+        var pipeline = new MarkdownPipelineBuilder().UseAdvancedExtensions().Build();
+        string s = Content.CONTENT.ToString();
+        result = Markdown.ToHtml(s, pipeline);
+        GetToc(result);
+    }
+
+    public void GetToc(string str)
+    {
+        Tocs = new List<toc>();
+        var node = new List<string>();
+        var regex = "<[Hh]([1-6])[^>]*>.*?[^/]+";
+        var regex1 = Regex.Matches(str, regex);
+        foreach (Match r in regex1)
+        {
+            node.Add(r.Value);
+        }
+
+        var min = 10000;
+        for (var i = 0; i < node.Count; i++)
+        {
+            var x = node[i];
+            var index = Convert.ToInt32(x[2]);
+            var idx = x.IndexOf('"');
+            x = x.Substring(idx + 1);
+            idx = x.IndexOf('"');
+
+            var id = x;
+            if (idx > 0)
+            {
+                id = x.Substring(0, idx);
+            }
+
+            var idx1 = x.IndexOf('>');
+            if (idx1 > 0)
+            {
+                x = x.Substring(idx1 + 1);
+                var idx2 = x.IndexOf('<');
+                if (idx2 > 0)
+                x = x.Substring(0, idx2);
+            }
+
+            min = Math.Min(min, index);
+            //全局变量
+            var t = new toc()
+                {
+                    Index = index,
+                    Id = id,
+                    Name = x
+                };
+            Tocs.Add(t);
+        }
+
+        Tocs.ForEach(c =>
+        {
+            c.Index -= min;
+        });
+    }
+
+}
+

@@ -1,0 +1,156 @@
+﻿@page "/"
+@using DataModels
+@using MudBlazor.Utilities
+@using BlogBlazorServer.DbConnection
+@using System.Linq
+@using BlogBlazorServer.Models
+<style>
+    .mud-button-text.mud-button-text-default:hover, .mud-button-text.mud-button-text-default:focus-visible {
+        background-color: transparent;
+    }
+</style>
+<MudContainer Class="mt-0 px-8" MaxWidth="MaxWidth.False">
+    <MudGrid>
+        <MudItem xs="3">
+            <MudPaper Elevation="25">
+                <MudItem xs="12" Class="px-15 py-5">
+                    <MudImage Style="width:100%" Src="https://www.baidu.com/img/flexible/logo/pc/result.png" Alt="Swedish Farm House" Class="rounded-lg" ObjectFit="@ObjectFit.Cover" />
+                </MudItem>
+                <MudDivider />
+                <MudPaper Class="pa-4" Elevation="0">
+                    <MudText Typo="Typo.h5">分类</MudText>
+                </MudPaper>
+                <MudGrid>
+                    <MudTreeView Hover="true" Style="width:100%" Class="mx-10" T="string" SelectedValueChanged="SelectedItemChanged">
+                        @foreach (var item in categories)
+                        {
+                            <MudTreeViewItem Icon="@Icons.Filled.LocalOffer" Value="@item" />
+                        }
+                    </MudTreeView>
+
+                </MudGrid>
+            </MudPaper>
+        </MudItem>
+        <MudItem xs="9">
+
+            <MudPaper Elevation="25" Style="position: relative;">
+
+                <MudOverlay Visible="isVisible" DarkBackground="true" Absolute="true">
+                    <MudProgressCircular Color="Color.Secondary" Indeterminate="true" />
+                </MudOverlay>
+                @if (isVisible)
+                {
+                    int t = 10;
+                    @while (t-- > 0)
+                    {
+                        <MudCard Elevation="0">
+                            <MudCardContent>
+                                <MudSkeleton Height="20px" Class="mx-5" Width="30%" />
+                                <MudDivider />
+                                <MudSkeleton Height="30px" Class="mx-5" Width="50%" />
+                                <MudSkeleton Height="50px" Class="mx-5" />
+                            </MudCardContent>
+                        </MudCard>
+                    }
+                }
+                else
+                {
+                    @foreach (dynamic user in articles)
+                    {
+                        <MudItem xs="12" Class="mx-5">
+                            <MudPaper Class="pa-4" Style="height: 40px;" Elevation="0">
+                                @{
+                                    var p = $"./detail/{user.ID}";
+                                    <MudText Typo="Typo.h6"><a href="@p" Style="font-weight: 400"> @user.ARTICLE_NAME</a></MudText>
+                                }
+
+                            </MudPaper>
+                            <MudPaper Class="pa-4" Style="height: 40px; overflow:hidden" Elevation="0">
+                                <MudText Typo="Typo.subtitle1" Style="font-weight: 100" Color="Color.Default">@user.CONTENT.ToString().Substring(0, 100)</MudText>
+                            </MudPaper>
+                            <MudPaper Class="pa-4 mb-5" Style="height: 40px;" Elevation="0">
+                                <MudGrid>
+                                    <MudItem xs="1" Style="text-align:right; flex-basis: 0;" Class="pr-1 pl-3">
+                                        <MudIcon Icon="@Icons.Rounded.Face" Size="Size.Medium" />
+                                    </MudItem>
+
+                                    <MudItem xs="2" Style="text-align:left;" Class="px-1">
+                                        <MudText Typo="Typo.overline" Style="font-weight: 100">@user.DISPLAY_NAME</MudText>
+                                    </MudItem>
+                                    <MudItem xs="1" Style="text-align:right" Class="px-1">
+                                        <MudIcon Icon="@Icons.Rounded.CalendarMonth" Size="Size.Medium" />
+                                    </MudItem>
+                                    <MudItem xs="2" Style="text-align:left" Class="px-1">
+                                        <MudText Typo="Typo.overline" Style="font-weight: 100"> @user.DATETIME_CREATED</MudText>
+                                    </MudItem>
+                                    <MudItem xs="6">
+                                        @for (var i = 0; i < @user.ARTICLE_CATEGORY.ToString().Split(';').Length; i++)
+                                        {
+                                            var item = @user.ARTICLE_CATEGORY.ToString().Split(';')[i];
+                                            string c = $"background:{Constants.Colors[i]};color:#fff";
+                                            <MudChip Icon="@Icons.Filled.Tag" Label="true" Style="@c" Size="Size.Small">@item</MudChip>
+                                        }
+                                    </MudItem>
+                                </MudGrid>
+                            </MudPaper>
+                            <MudDivider Class="mx-4" />
+                        </MudItem>
+                    }
+                }
+            </MudPaper>
+
+        </MudItem>
+
+        <MudItem xs="12" Style="text-align:center">
+            <MudPagination Rectangular="true" Variant="Variant.Text" Count="@pages" Class="ma-5" SelectedChanged="PageSelectedChanged" />
+        </MudItem>
+    </MudGrid>
+
+    <MudScrollToTop>
+        <MudFab Color="Color.Tertiary" Icon="@Icons.Filled.ArrowCircleUp" />
+    </MudScrollToTop>
+</MudContainer>
+
+@code {
+    bool isVisible = true;
+
+    List<SysUser> p = new List<SysUser>();
+    string imagePath = AppDomain.CurrentDomain.BaseDirectory + "a.jpg";
+    List<dynamic> articles = new List<dynamic>();
+    List<string> categories = new List<string>() { "全部" };
+    int startIndex = 1;
+    int length = 15;
+    int pages = 1;
+
+
+    protected override async Task OnInitializedAsync()
+    {
+        var db = new DbContext();
+        var t = await db.GetArticlesAsync(selectedValue, startIndex, length);
+        articles = t.data;
+        pages = t.totalCount % length == 0 ? t.totalCount / length : (int)(t.totalCount / length) + 1;
+
+        categories.AddRange(db.GetCategories());
+        isVisible = false;
+    }
+
+    public void PageSelectedChanged(int p)
+    {
+        var t = new DbContext().GetArticles(selectedValue, p, length);
+        articles = t.data;
+        pages = t.totalCount % length == 0 ? t.totalCount / length : (int)(t.totalCount / length) + 1;
+    }
+
+    [Parameter]
+    public string selectedValue { get; set; } = "全部";
+
+    public void SelectedItemChanged(string item)
+    {
+        //selectedItem = item;
+        selectedValue = item;
+        var db = new DbContext();
+        var t = db.GetArticles(item, startIndex, length);
+        articles = t.data;
+        pages = t.totalCount % length == 0 ? t.totalCount / length : (int)(t.totalCount / length) + 1;
+    }
+}

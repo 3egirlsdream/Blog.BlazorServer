@@ -1,0 +1,118 @@
+﻿@using System.Net.Http.Json
+@using System.Text.Json.Serialization;
+@using BlogBlazorServer.Models
+
+
+@page "/MyFiles"
+
+<style>
+    .mud-button-text.mud-button-text-secondary:hover, .mud-button-text.mud-button-text-secondary:focus-visible {
+        background-color: transparent;
+    }
+
+</style>
+
+<MudTable Items="@Elements" MultiSelection="true" T="FileList" SelectedItemsChanged="OnSelectedItemsChanged" Comparer="Comparer" Elevation="0">
+    <ToolBarContent>
+        <MudMenu Label="Advanced Placement" Variant="Variant.Filled" AnchorOrigin="@Origin.BottomCenter" TransformOrigin="@Origin.TopCenter" Color="Color.Default" Size="Size.Large">
+            <ActivatorContent>
+                <MudButton Variant="Variant.Filled" StartIcon="@Icons.Material.Filled.UploadFile" Color="Color.Primary">上传</MudButton>
+            </ActivatorContent>
+            <ChildContent>
+                <MudMenuItem>上传文件</MudMenuItem>
+                <MudMenuItem>上传文件夹</MudMenuItem>
+            </ChildContent>
+        </MudMenu>
+
+        <MudButton Variant="Variant.Filled" StartIcon="@Icons.Material.Filled.CreateNewFolder" Class="ml-5">新建文件夹</MudButton>
+        <MudButton Variant="Variant.Filled" StartIcon="@Icons.Material.Filled.DownloadForOffline" Class="ml-5">离线下载</MudButton>
+    </ToolBarContent>
+    <ColGroup>
+        <col style="width: 60px;" />
+        <col />
+        <col />
+    </ColGroup>
+    <HeaderContent>
+        <MudTh>文件名</MudTh>
+        <MudTh>修改时间</MudTh>
+        <MudTh>大小</MudTh>
+    </HeaderContent>
+    <RowTemplate>
+        <MudTd DataLabel="文件名">
+            @* <MudIcon Icon="@Icons.Custom.Brands.MudBlazor" Color="Color.Primary" />*@
+            <MudButton Href="https://github.com/MudBlazor/MudBlazor" Class="button-hover"
+                       Target="_blank"
+                       Variant="Variant.Text"
+                       StartIcon="@Icons.Custom.Brands.GitHub"
+                       Color="Color.Secondary"
+                       Style="text-transform:none">
+                @context.FileName
+            </MudButton>
+        </MudTd>
+        <MudTd DataLabel="修改时间">@context.DatetimeModified</MudTd>
+        <MudTd DataLabel="大小">@context.Size</MudTd>
+    </RowTemplate>
+    <PagerContent>
+        <MudTablePager PageSizeOptions="new int[]{50, 100}" />
+    </PagerContent>
+    <FooterContent>
+        <MudTd colspan="5">Select All</MudTd>
+    </FooterContent>
+</MudTable>
+
+<MudText Inline="true">Selected items: @(selectedItems1==null ? "" : string.Join(", ", selectedItems1.OrderBy(x => x.DatetimeCreated).Select(x => x.FileName)))</MudText>
+
+    @code {
+    private HashSet<FileList> selectedItems1 = new HashSet<FileList>();
+
+    private List<FileList> Elements = new List<FileList>();
+
+    private FileListComparer Comparer = new();
+
+    private void OnSelectedItemsChanged(HashSet<FileList> elements)
+    {
+        var e = elements.FirstOrDefault();
+        if (e != null)
+        {
+            e.FileName = "Changed";
+        }
+    }
+
+    protected override async Task OnInitializedAsync()
+    {
+        int n = 5;
+        while (n-- > 0)
+        {
+            var f = new FileList();
+            f.Id = Guid.NewGuid().ToString("N").ToUpper();
+            f.FileName = n + "行";
+            f.Icon = "Download";
+            f.DatetimeCreated = DateTime.Now;
+            f.Size = 100;
+            Elements.Add(f);
+        }
+        //Elements = await httpClient.GetFromJsonAsync<List<FileList>>("webapi/periodictable");
+    }
+
+    class FileListComparer : IEqualityComparer<FileList>
+    {
+        public bool Equals(FileList a, FileList b)
+        {
+            if (a == null && b == null) return true;
+            else if (a != null && b != null)
+            {
+                if (!string.IsNullOrEmpty(a.MD5) && !string.IsNullOrEmpty(b.MD5))
+                {
+                    return a.MD5.Equals(b.MD5);
+                }
+                else
+                {
+                    return a.Id == b.Id;
+                }
+            }
+            else return false;
+        }
+        public int GetHashCode(FileList x) => HashCode.Combine(x?.Id);
+    }
+}
+

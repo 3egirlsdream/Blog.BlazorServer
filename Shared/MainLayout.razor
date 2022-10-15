@@ -1,0 +1,98 @@
+﻿@using BlogBlazorServer.Commons
+@inherits LayoutComponentBase
+@inject NavigationManager NavigationManager
+
+<MudThemeProvider />
+<MudDialogProvider />
+<MudSnackbarProvider />
+
+<MudLayout Style="background:#f3f3f3">
+    <MudPaper Elevation="0">
+        <MudAppBar Fixed="true" style="background:rgba(255, 255, 255, 0.8); color:black; backdrop-filter: blur(5px);" Elevation="25">
+            <MudIconButton Icon="@Icons.Rounded.Mood" Color="Color.Warning" Edge="Edge.Start" />
+            <MudButton Color="NavigationManager.BaseUri == NavigationManager.Uri ? Color.Info : Color.Transparent" Link="/">主页</MudButton>
+
+            <MudButton Color="Color.Transparent" Link="/categories">分类</MudButton>
+            <MudSpacer />
+
+
+            <MudSpacer />
+            <MudSpacer />
+            <MudSpacer />
+            <MudSpacer />
+            <MudSpacer />
+            <MudSpacer />
+            <MudSpacer />
+            <MudSpacer />
+            <MudSpacer />
+            <MudSpacer />
+            <MudSpacer />
+            <MudSpacer />
+            <MudSpacer />
+            <MudSpacer />
+            <MudSpacer />
+            <MudSpacer />
+            <MudSpacer />
+            <MudSpacer />
+            <MudSpacer />
+            <MudTextField Margin="Margin.Dense" Style="border:0px;" OnDebounceIntervalElapsed="HandleIntervalElapsed" @bind-Value="@_debouncedText" Variant="Variant.Outlined" Adornment="Adornment.End" AdornmentIcon="@Icons.Filled.Search" OnAdornmentClick="OnAdornmentClick" />
+
+            <MudDivider Vertical="true" FlexItem="true" DividerType="DividerType.Middle" Class="my-3" />
+            <MudIconButton Icon="@Icons.Custom.Brands.MudBlazor" Color="Color.Inherit" Link="https://mudblazor.com/" Target="_blank" />
+            <MudIconButton Icon="@Icons.Custom.Brands.GitHub" Color="Color.Inherit" Link="https://github.com/MudBlazor/MudBlazor/" Target="_blank" />
+        </MudAppBar>
+    </MudPaper>
+    <MudDrawer @bind-Open="@_drawerOpen" ClipMode="clipMode" Breakpoint="@breakpoint" PreserveOpenState="@preserveOpenState" Elevation="0" Variant="@DrawerVariant.Responsive" OpenMiniOnHover="true" MiniWidth="800">
+        <MudPaper Elevation="25" class="my-16 mx-5 pt-16">
+            <NavMenu />
+        </MudPaper>
+    </MudDrawer>
+    <MudMainContent>
+        <MudContainer MaxWidth="MaxWidth.Large" Class="my-16 pt-16">
+            @Body
+
+            @*            <ErrorBoundary>
+            *@
+            @* </ErrorBoundary>
+            <ErrorContent>
+            <p class="errorUI">Nothing to see here right now. Sorry!</p>
+            </ErrorContent>*@
+        </MudContainer>
+        <MudItem xs="12" Class="my-5" Style="text-align:center"><MudText Typo="Typo.body1" Style="font-weight:100">© 2022 Powered By .NET6 & Blazor Server</MudText>  </MudItem>
+    </MudMainContent>
+
+</MudLayout>
+
+
+
+@code {
+    bool _drawerOpen = false;
+    bool preserveOpenState = false;
+    DrawerClipMode clipMode = DrawerClipMode.Docked;
+    Breakpoint breakpoint = Breakpoint.Md;
+    void DrawerToggle()
+    {
+        _drawerOpen = !_drawerOpen;
+    }
+
+    private void UploadFiles(InputFileChangeEventArgs e)
+    {
+        var entries = e.GetMultipleFiles();
+
+        var ee = entries.FirstOrDefault();
+        //TODO upload the files to the server
+    }
+
+    string _normalText = "w";
+    string _immediateText = "t";
+    string _debouncedText = "";
+    void HandleIntervalElapsed(string debouncedText)
+    {
+        // at this stage, interval has elapsed
+    }
+
+    void OnAdornmentClick()
+    {
+        NavigationManager.NavigateTo("/search");
+    }
+}

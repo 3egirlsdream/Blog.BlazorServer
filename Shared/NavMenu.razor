@@ -1,0 +1,12 @@
+﻿<MudNavMenu>
+    <MudText Typo="Typo.h6" Class="px-4">Material</MudText>
+    <MudText Typo="Typo.body2" Class="px-4 mud-text-secondary">Icons</MudText>
+    <MudNavLink Href="" Match="NavLinkMatch.All" Icon="@Icons.Material.Filled.Home">首页</MudNavLink>
+    <MudNavLink Href="/MyFiles" Match="NavLinkMatch.All" Icon="@Icons.Material.Filled.InsertDriveFile">我的文件</MudNavLink>
+    <MudNavGroup Href="/MyFiles" Title="我的文件" Expanded="true" Icon="@Icons.Material.Filled.Receipt">
+        <MudNavLink Href="/Counter">Users</MudNavLink>
+        <MudNavLink Href="/security">Security</MudNavLink>
+    </MudNavGroup>
+    <MudNavLink Href="counter" Match="NavLinkMatch.Prefix" Icon="@Icons.Material.Filled.Add">Counter</MudNavLink>
+    <MudNavLink Href="fetchdata" Match="NavLinkMatch.Prefix" Icon="@Icons.Material.Filled.List">Fetch data</MudNavLink>
+</MudNavMenu>
