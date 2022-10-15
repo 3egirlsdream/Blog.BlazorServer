@@ -14,14 +14,14 @@
         <MudItem xs="3">
             <MudPaper Elevation="25">
                 <MudItem xs="12" Class="px-15 py-5">
-                    <MudImage Style="width:100%" Src="https://www.baidu.com/img/flexible/logo/pc/result.png" Alt="Swedish Farm House" Class="rounded-lg" ObjectFit="@ObjectFit.Cover" />
+                    <MudImage Style="width:100%" Src="http://cdn.thankful.top/yaofan.jpg" Class="rounded-lg" ObjectFit="@ObjectFit.Cover" />
                 </MudItem>
                 <MudDivider />
-                <MudPaper Class="pa-4" Elevation="0">
-                    <MudText Typo="Typo.h5">分类</MudText>
+                <MudPaper Class="py-4 pl-8" Elevation="0">
+                    <MudText Typo="Typo.h5" Color="Color.Default">分类</MudText>
                 </MudPaper>
                 <MudGrid>
-                    <MudTreeView Hover="true" Style="width:100%" Class="mx-10" T="string" SelectedValueChanged="SelectedItemChanged">
+                    <MudTreeView Hover="true" Style="width:100%;text-align:left" Class="mx-5" T="string" SelectedValueChanged="SelectedItemChanged">
                         @foreach (var item in categories)
                         {
                             <MudTreeViewItem Icon="@Icons.Filled.LocalOffer" Value="@item" />
@@ -55,6 +55,17 @@
                 }
                 else
                 {
+                    @if (selectedValue != "全部")
+                    {
+                        <MudItem xs="12" Class="mx-5">
+                            <MudPaper Class="pa-4" Style="height: 80px;" Elevation="0">
+                                <MudText Typo="Typo.h5" Style="font-weight: 100" Color="Color.Default">
+                                    分类：@selectedValue
+                                </MudText>
+                            </MudPaper>
+                            <MudDivider Class="mx-4" />
+                        </MudItem>
+                    }
                     @foreach (dynamic user in articles)
                     {
                         <MudItem xs="12" Class="mx-5">
@@ -146,6 +157,7 @@
 
     public void SelectedItemChanged(string item)
     {
+        if (string.IsNullOrEmpty(item)) return;
         //selectedItem = item;
         selectedValue = item;
         var db = new DbContext();

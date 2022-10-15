@@ -1,18 +1,11 @@
-﻿using BlogBlazorServer.Data;
-using DataModels;
+﻿using DataModels;
 using LinqToDB;
-using LinqToDB.Data;
-using Microsoft.Extensions.Caching.Memory;
 
 namespace BlogBlazorServer.DbConnection
 {
     public class DbContext
     {
-        public DbContext(IMemoryCache memoryCache)
-        {
-            MemoryCache = memoryCache;
-        }
-
+        const string http = "http://thankful.top:4396";
         public DbContext()
         {
         }
@@ -35,7 +28,7 @@ namespace BlogBlazorServer.DbConnection
 
         public dynamic GetArticles(string category,int start, int length)
         {
-            var url = $"http://42.194.131.197:4396/api/article/GetArticlesToPage?user=cxk&category={category}&startIndex={start}&length={length}";
+            var url = http + $"/api/article/GetArticlesToPage?user=cxk&category={category}&startIndex={start}&length={length}";
             HttpClientHelper helper = new HttpClientHelper();
             var rtl = helper.Get<ARTICLE_RESULT>(url);
             if (rtl.success)
@@ -57,7 +50,7 @@ namespace BlogBlazorServer.DbConnection
         {
             return Task.Run(() =>
             {
-                var url = $"http://42.194.131.197:4396/api/article/GetArticlesToPage?user=cxk&category={category}&startIndex={start}&length={length}";
+                var url = http + $"/api/article/GetArticlesToPage?user=cxk&category={category}&startIndex={start}&length={length}";
                 HttpClientHelper helper = new HttpClientHelper();
                 var rtl = helper.Get<ARTICLE_RESULT>(url);
                 if (rtl.success)
@@ -78,7 +71,7 @@ namespace BlogBlazorServer.DbConnection
 
         public List<string> GetCategories()
         {
-            var url = "http://thankful.top:4396/api/Article/GetArticleCategory";
+            var url = http + "/api/Article/GetArticleCategory";
             HttpClientHelper helper = new HttpClientHelper();
             var rtl = helper.Get<List<string>>(url);
             if (rtl.success)
@@ -95,7 +88,7 @@ namespace BlogBlazorServer.DbConnection
         {
             return Task.Run(() =>
             {
-                var url = $"http://thankful.top:4396/api/article/GetArticleContent?id={id}";
+                var url = http + $"/api/article/GetArticleContent?id={id}";
                 HttpClientHelper helper = new HttpClientHelper();
                 var rtl = helper.Get<dynamic>(url);
                 if (rtl.success)
@@ -112,7 +105,7 @@ namespace BlogBlazorServer.DbConnection
 
         public dynamic GetContent2(string id)
         {
-            var url = $"http://thankful.top:4396/api/article/GetArticleContent?id={id}";
+            var url = http + $"/api/article/GetArticleContent?id={id}";
             HttpClientHelper helper = new HttpClientHelper();
             var rtl = helper.Get<dynamic>(url);
             if (rtl.success)
@@ -125,27 +118,23 @@ namespace BlogBlazorServer.DbConnection
             }
         }
 
-        public IMemoryCache MemoryCache { get; }
-        public Task<WeatherForecast[]> GetForecastAsync(DateTime startDate)
+        public Task<List<dynamic>> SearchAsync(string parameter)
         {
-            return MemoryCache.GetOrCreateAsync(startDate, async e =>
+            return Task.Run(() =>
             {
-                e.SetOptions(new MemoryCacheEntryOptions
+                var url = http + $"/api/article/search?parameter={parameter}";
+                HttpClientHelper helper = new HttpClientHelper();
+                var rtl = helper.Get<List<dynamic>>(url);
+                if (rtl.success)
                 {
-                    AbsoluteExpirationRelativeToNow =
-                        TimeSpan.FromSeconds(30)
-                });
-
-                var rng = new Random();
-
-                await Task.Delay(TimeSpan.FromSeconds(10));
-
-                return Enumerable.Range(1, 5).Select(index => new WeatherForecast
+                    return rtl.data;
+                }
+                else
                 {
-                    Date = startDate.AddDays(index),
-                    TemperatureC = rng.Next(-20, 55)
-                }).ToArray();
+                    return new List<dynamic>();
+                }
             });
+           
         }
 
     }

@@ -1,4 +1,5 @@
 ﻿@using BlogBlazorServer.Commons
+@using BlogBlazorServer.DbConnection
 @inherits LayoutComponentBase
 @inject NavigationManager NavigationManager
 
@@ -35,7 +36,27 @@
             <MudSpacer />
             <MudSpacer />
             <MudSpacer />
-            <MudTextField Margin="Margin.Dense" Style="border:0px;" OnDebounceIntervalElapsed="HandleIntervalElapsed" @bind-Value="@_debouncedText" Variant="Variant.Outlined" Adornment="Adornment.End" AdornmentIcon="@Icons.Filled.Search" OnAdornmentClick="OnAdornmentClick" />
+            <div class="d-flex">
+                <MudTextField Margin="Margin.Dense" Style="border:0px; max-width:250px;" OnDebounceIntervalElapsed="HandleIntervalElapsed" @bind-Value="@_debouncedText" Variant="Variant.Outlined" Adornment="Adornment.End" AdornmentIcon="@Icons.Filled.Search" OnAdornmentClick="OnAdornmentClick" />
+                @if (SearchResult.Count > 0 && !string.IsNullOrEmpty(_debouncedText))
+                {
+                    <MudPopover Open="true" AnchorOrigin="Origin.BottomCenter" TransformOrigin="Origin.TopCenter" Style="max-width:250px;">
+                        <MudPaper  Elevation="0">
+                            @foreach(var item in SearchResult)
+                            {
+                                var href = $"/detail/{item.ID}";
+                                <MudItem xs="12">
+                                    <MudText Class="mx-4 my-2"><a href="@href">@item.ARTICLE_NAME</a></MudText>
+                                    @if (SearchResult.IndexOf(item) != SearchResult.Count - 1)
+                                    {
+                                        <MudDivider/>
+                                    }
+                                </MudItem>
+                            }
+                        </MudPaper>
+                    </MudPopover>
+                }
+            </div>
 
             <MudDivider Vertical="true" FlexItem="true" DividerType="DividerType.Middle" Class="my-3" />
             <MudIconButton Icon="@Icons.Custom.Brands.MudBlazor" Color="Color.Inherit" Link="https://mudblazor.com/" Target="_blank" />
@@ -86,13 +107,19 @@
     string _normalText = "w";
     string _immediateText = "t";
     string _debouncedText = "";
+    List<dynamic> SearchResult = new List<dynamic>();
     void HandleIntervalElapsed(string debouncedText)
     {
         // at this stage, interval has elapsed
     }
 
+    protected override async Task OnInitializedAsync()
+    {
+    }
+
     void OnAdornmentClick()
     {
-        NavigationManager.NavigateTo("/search");
+        var db = new DbContext();
+        SearchResult = db.SearchAsync(_debouncedText).Result;
     }
 }
