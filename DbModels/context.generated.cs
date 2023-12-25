@@ -29,6 +29,7 @@ namespace DataModels
 		public ITable<ArticleCategory>  ArticleCategories { get { return this.GetTable<ArticleCategory>(); } }
 		public ITable<ChatRecord>       ChatRecords       { get { return this.GetTable<ChatRecord>(); } }
 		public ITable<ClientVersion>    ClientVersions    { get { return this.GetTable<ClientVersion>(); } }
+		public ITable<CloudFont>        CloudFonts        { get { return this.GetTable<CloudFont>(); } }
 		public ITable<CloudStorage>     CloudStorages     { get { return this.GetTable<CloudStorage>(); } }
 		public ITable<EMOJI>            Emojis            { get { return this.GetTable<EMOJI>(); } }
 		public ITable<FoodImage>        FoodImages        { get { return this.GetTable<FoodImage>(); } }
@@ -43,6 +44,7 @@ namespace DataModels
 		public ITable<PlayCount>        PlayCounts        { get { return this.GetTable<PlayCount>(); } }
 		public ITable<SongList>         SongLists         { get { return this.GetTable<SongList>(); } }
 		public ITable<SongListDetail>   SongListDetails   { get { return this.GetTable<SongListDetail>(); } }
+		public ITable<SUBSCRIBER>       SUBSCRIBERS       { get { return this.GetTable<SUBSCRIBER>(); } }
 		public ITable<SysShopDetail>    SysShopDetails    { get { return this.GetTable<SysShopDetail>(); } }
 		public ITable<SysShopInfo>      SysShopInfo       { get { return this.GetTable<SysShopInfo>(); } }
 		public ITable<SysUser>          SysUsers          { get { return this.GetTable<SysUser>(); } }
@@ -60,15 +62,15 @@ namespace DataModels
 			InitMappingSchema();
 		}
 
-		public DbDB(LinqToDBConnectionOptions options)
+		public DbDB(DataOptions options)
 			: base(options)
 		{
 			InitDataContext();
 			InitMappingSchema();
 		}
 
-		public DbDB(LinqToDBConnectionOptions<DbDB> options)
-			: base(options)
+		public DbDB(DataOptions<DbDB> options)
+			: base(options.Options)
 		{
 			InitDataContext();
 			InitMappingSchema();
@@ -152,11 +154,21 @@ namespace DataModels
 	[Table("CLIENT_VERSION")]
 	public partial class ClientVersion
 	{
-		[PrimaryKey, NotNull] public string   ID       { get; set; } // varchar(80)
-		[Column,     NotNull] public DateTime DATETIME { get; set; } // datetime
-		[Column,     NotNull] public string   CLIENT   { get; set; } // varchar(255)
-		[Column,     NotNull] public string   VERSION  { get; set; } // varchar(255)
-		[Column,     NotNull] public string   PATH     { get; set; } // text
+		[PrimaryKey, NotNull    ] public string   ID       { get; set; } // varchar(80)
+		[Column,     NotNull    ] public DateTime DATETIME { get; set; } // datetime
+		[Column,     NotNull    ] public string   CLIENT   { get; set; } // varchar(255)
+		[Column,     NotNull    ] public string   VERSION  { get; set; } // varchar(255)
+		[Column,     NotNull    ] public string   PATH     { get; set; } // text
+		[Column,        Nullable] public string   MEMO     { get; set; } // text
+	}
+
+	[Table("CLOUD_FONT")]
+	public partial class CloudFont
+	{
+		[Column(),        PrimaryKey, NotNull] public string ID   { get; set; } // varchar(80)
+		[Column(),                    NotNull] public string NAME { get; set; } // varchar(255)
+		[Column(),                    NotNull] public string URL  { get; set; } // varchar(1000)
+		[Column("URL_B"),             NotNull] public string UrlB { get; set; } // varchar(1000)
 	}
 
 	[Table("CLOUD_STORAGE")]
@@ -351,6 +363,15 @@ namespace DataModels
 		[Column("MUSIC_ID"),                       NotNull] public string    MusicId          { get; set; } // varchar(80)
 	}
 
+	[Table("SUBSCRIBERS")]
+	public partial class SUBSCRIBER
+	{
+		[Column,        Nullable] public string JSON   { get; set; } // longtext
+		[Column,        Nullable] public string CLIENT { get; set; } // varchar(255)
+		[PrimaryKey, NotNull    ] public string ID     { get; set; } // varchar(80)
+		[Column,        Nullable] public int?   TOTAL  { get; set; } // int
+	}
+
 	[Table("SYS_SHOP_DETAIL")]
 	public partial class SysShopDetail
 	{
@@ -433,6 +454,12 @@ namespace DataModels
 				t.ID == ID);
 		}
 
+		public static CloudFont Find(this ITable<CloudFont> table, string ID)
+		{
+			return table.FirstOrDefault(t =>
+				t.ID == ID);
+		}
+
 		public static CloudStorage Find(this ITable<CloudStorage> table, string ID)
 		{
 			return table.FirstOrDefault(t =>
@@ -494,6 +521,12 @@ namespace DataModels
 		}
 
 		public static SongListDetail Find(this ITable<SongListDetail> table, string ID)
+		{
+			return table.FirstOrDefault(t =>
+				t.ID == ID);
+		}
+
+		public static SUBSCRIBER Find(this ITable<SUBSCRIBER> table, string ID)
 		{
 			return table.FirstOrDefault(t =>
 				t.ID == ID);

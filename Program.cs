@@ -13,9 +13,11 @@ Services = builder.Services;
 StaticWebAssetsLoader.UseStaticWebAssets(builder.Environment, builder.Configuration);
 
 // Add services to the container.
-builder.Services.AddRazorPages();
-builder.Services.AddServerSideBlazor();
-builder.Services.AddSingleton<WeatherForecastService>();
+builder.Services.AddRazorComponents()
+    .AddInteractiveServerComponents()
+    .AddInteractiveWebAssemblyComponents();
+
+//builder.Services.AddSingleton<WeatherForecastService>();
 builder.Services.AddMudServices();
 DataConnection.DefaultSettings = new Linq2dbSettings(builder.Configuration);
 
@@ -37,9 +39,11 @@ app.UseHttpsRedirection();
 app.UseStaticFiles();
 
 app.UseRouting();
+app.UseAntiforgery();
 
-app.MapBlazorHub();
-app.MapFallbackToPage("/_Host");
+app.MapRazorComponents<App>()
+                .AddInteractiveServerRenderMode()
+                .AddInteractiveWebAssemblyRenderMode();
 
 app.Run();
 

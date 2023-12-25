@@ -1,7 +1,7 @@
 ﻿<Project Sdk="Microsoft.NET.Sdk.Web">
 
   <PropertyGroup>
-	  <TargetFramework>net6.0</TargetFramework>
+	  <TargetFramework>net8.0</TargetFramework>
 	  <Nullable>annotations</Nullable>
 	  <ImplicitUsings>enable</ImplicitUsings>
 	  <UserSecretsId>2c92049d-c366-4ab5-a398-34527095ec50</UserSecretsId>
@@ -14,11 +14,13 @@
   </ItemGroup>
 
   <ItemGroup>
-    <PackageReference Include="linq2db.MySql" Version="4.1.1" />
-    <PackageReference Include="Markdig.Signed" Version="0.30.4" />
-    <PackageReference Include="Microsoft.VisualStudio.Azure.Containers.Tools.Targets" Version="1.17.0" />
-    <PackageReference Include="MudBlazor" Version="6.0.13" />
-    <PackageReference Include="Newtonsoft.Json" Version="13.0.1" />
+    <PackageReference Include="linq2db.MySql" Version="5.3.2" />
+    <PackageReference Include="Markdig.Signed" Version="0.34.0" />
+    <PackageReference Include="Microsoft.AspNetCore.Components.WebAssembly.Server" Version="8.0.0" />
+    <PackageReference Include="Microsoft.VisualStudio.Azure.Containers.Tools.Targets" Version="1.19.5" />
+	<PackageReference Include="Microsoft.Extensions.Caching.Abstractions" Version="8.0.0" />
+    <PackageReference Include="MudBlazor" Version="6.11.2" />
+    <PackageReference Include="Newtonsoft.Json" Version="13.0.3" />
   </ItemGroup>
 
   <ItemGroup>

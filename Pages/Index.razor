@@ -4,6 +4,7 @@
 @using BlogBlazorServer.DbConnection
 @using System.Linq
 @using BlogBlazorServer.Models
+@using System.Diagnostics
 <style>
     .mud-button-text.mud-button-text-default:hover, .mud-button-text.mud-button-text-default:focus-visible {
         background-color: transparent;
@@ -143,7 +144,9 @@
 
         categories.AddRange(db.GetCategories());
         isVisible = false;
+        Debug.WriteLine(1);
     }
+
 
     public void PageSelectedChanged(int p)
     {
