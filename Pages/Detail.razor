@@ -18,10 +18,14 @@
         list-style:inherit;
     }
 
+    .mud-grid-spacing-xs-3 > .mud-grid-item {
+        padding: 0px;
+    }
+
 </style>
 
 <MudGrid>
-    <MudItem xs="10">
+    <MudItem xs="@(ShowToc ? 10 : 12)">
         <MudPaper Elevation="25" Style="position: relative;">
             <MudOverlay Visible="isVisible" DarkBackground="true" Absolute="true">
                 <MudProgressCircular Color="Color.Secondary" Indeterminate="true" />
@@ -75,71 +79,77 @@
             {
                 <div Class="pa-5 markdown-body" Typo="Typo.body1">@(new MarkupString(result))</div>
             }
-
-
-            <MudDivider Class="my-5" />
-            <MudItem xs="12" Class="ma-5">
-                <MudText Typo="Typo.h5" Style="font-weight:700">更多</MudText>
-            </MudItem>
-            <MudGrid Class="mb-5">
-                @if (Content.LAST_ESSAY_NAME != null)
-                {
-                    <MudItem xs="1" Style="text-align:right" Class="pr-1">
-                        <MudIcon Icon="@Icons.Rounded.NavigateBefore" Size="Size.Medium" />
-                    </MudItem>
-                    <MudItem xs="5" Style="text-align:left" Class="px-1">
-                        @{
-                            var h = $"/detail/{Content.LAST_ESSAY}";
-                                                        <MudText Typo="Typo.h6" Style="margin-top:-3px;"><a href="@h">@Content.LAST_ESSAY_NAME</a></MudText>
-                        }
-
-                    </MudItem>
-                }
-                else
-                {
-                    <MudItem xs="6"></MudItem>
-                }
-                @if (Content.NEXT_ESSAY_NAME != null)
-                {
-                    <MudItem xs="5" Style="text-align:right" Class="px-1">
-                        @{
-                            var h = $"/detail/{Content.NEXT_ESSAY}";
-                                                        <MudText Typo="Typo.h6" Style="margin-top:-3px;"><a href="@h">@Content.NEXT_ESSAY_NAME</a></MudText>
-                        }
-                    </MudItem>
-                    <MudItem xs="1" Style="text-align:left" Class="px-1">
-                        <MudIcon Icon="@Icons.Rounded.NavigateNext" Size="Size.Medium" />
-                    </MudItem>
-                }
-                else
-                {
-                    <MudItem xs="6"></MudItem>
-                }
-            </MudGrid>
-
-        </MudPaper>
-    </MudItem>
-    <MudItem xs="2">
-        <MudPaper Elevation="25" Class="pa-4">
-
-            <MudText Typo="Typo.h6">目录</MudText>
-            <MudDivider Class="my-2"/>
-            @foreach (var item in Tocs)
+            @if (ShowToc)
             {
-                var route = NavigationManager.Uri.Replace(NavigationManager.BaseUri, "");
-                var herf = $"/{route}#{item.Id}";
-                <a style="text-decoration: none;overflow:hidden;" href="@herf">
-                    <font color="black">
-                        @while (item.Index-- > 0)
-                        {
-                            <span style="margin-left: 15px"></span>
-                        }
-                        ⚪@item.Name<br />
-                    </font>
-                </a>
+                
+            
+
+                <MudDivider Class="my-5" />
+                <MudItem xs="12" Class="ma-5">
+                    <MudText Typo="Typo.h5" Style="font-weight:700">更多</MudText>
+                </MudItem>
+                <MudGrid Class="mb-5">
+                    @if (Content.LAST_ESSAY_NAME != null)
+                    {
+                        <MudItem xs="1" Style="text-align:right" Class="pr-1">
+                            <MudIcon Icon="@Icons.Rounded.NavigateBefore" Size="Size.Medium" />
+                        </MudItem>
+                        <MudItem xs="5" Style="text-align:left" Class="px-1">
+                            @{
+                                var h = $"/detail/{Content.LAST_ESSAY}";
+                                                            <MudText Typo="Typo.h6" Style="margin-top:-3px;"><a href="@h">@Content.LAST_ESSAY_NAME</a></MudText>
+                            }
+
+                        </MudItem>
+                    }
+                    else
+                    {
+                        <MudItem xs="6"></MudItem>
+                    }
+                    @if (Content.NEXT_ESSAY_NAME != null)
+                    {
+                        <MudItem xs="5" Style="text-align:right" Class="px-1">
+                            @{
+                                var h = $"/detail/{Content.NEXT_ESSAY}";
+                                                            <MudText Typo="Typo.h6" Style="margin-top:-3px;"><a href="@h">@Content.NEXT_ESSAY_NAME</a></MudText>
+                            }
+                        </MudItem>
+                        <MudItem xs="1" Style="text-align:left" Class="px-1">
+                            <MudIcon Icon="@Icons.Rounded.NavigateNext" Size="Size.Medium" />
+                        </MudItem>
+                    }
+                    else
+                    {
+                        <MudItem xs="6"></MudItem>
+                    }
+                </MudGrid>
             }
         </MudPaper>
     </MudItem>
+    @if (ShowToc)
+    {
+        <MudItem xs="2">
+            <MudPaper Elevation="25" Class="pa-4">
+
+                <MudText Typo="Typo.h6">目录</MudText>
+                <MudDivider Class="my-2"/>
+                @foreach (var item in Tocs)
+                {
+                    var route = NavigationManager.Uri.Replace(NavigationManager.BaseUri, "");
+                    var herf = $"/{route}#{item.Id}";
+                    <a style="text-decoration: none;overflow:hidden;" href="@herf">
+                        <font color="black">
+                            @while (item.Index-- > 0)
+                            {
+                                <span style="margin-left: 15px"></span>
+                            }
+                            ⚪@item.Name<br />
+                        </font>
+                    </a>
+                }
+            </MudPaper>
+        </MudItem>
+    }
     <MudScrollToTop>
         <MudFab Color="Color.Tertiary" Icon="@Icons.Filled.ArrowCircleUp" />
     </MudScrollToTop>
@@ -168,6 +178,9 @@
         NEXT_ESSAY = ""
     };
     string result = "";
+
+    [Parameter]
+    public bool ShowToc { get; set; } = true;
 
     class toc
     {

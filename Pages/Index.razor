@@ -5,6 +5,8 @@
 @using System.Linq
 @using BlogBlazorServer.Models
 @using System.Diagnostics
+@rendermode @(new InteractiveServerRenderMode(false))
+@attribute [StreamRendering]
 <style>
     .mud-button-text.mud-button-text-default:hover, .mud-button-text.mud-button-text-default:focus-visible {
         background-color: transparent;
